@@ -28,19 +28,19 @@ np.seterr(all='ignore')
 miso_path = os.path.dirname(os.path.abspath(__file__))
 
 def greeting(parser=None):
-    print "MISO (Mixture of Isoforms model)"
-    print "Summarize MISO output to get Psi values and confidence intervals."
-    print "Use --help argument to view options.\n"
+    print("MISO (Mixture of Isoforms model)")
+    print("Summarize MISO output to get Psi values and confidence intervals.")
+    print("Use --help argument to view options.\n")
     if parser is not None:
         parser.print_help()
-    
-    
+
+
 def main():
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("--summarize-samples", dest="summarize_samples",
                       nargs=2, default=None,
-		      help="Compute summary statistics of the given set "
+                      help="Compute summary statistics of the given set "
                       "of samples. Expects a directory with MISO output "
                       "and a directory to output summary file to.")
     parser.add_option("--summary-label", dest="summary_label",
@@ -61,34 +61,34 @@ def main():
         use_compressed = \
             os.path.abspath(os.path.expanduser(options.use_compressed))
         if not os.path.exists(use_compressed):
-            print "Error: mapping filename from event IDs to compressed IDs %s " \
-                  "is not found." %(use_compressed)
+            print("Error: mapping filename from event IDs to compressed IDs %s " \
+                  "is not found." %(use_compressed))
             sys.exit(1)
         else:
-            print "Compression being used."
+            print("Compression being used.")
 
     ##
     ## Summarizing samples
     ##
     if options.summarize_samples:
-	samples_dir = \
+        samples_dir = \
             os.path.abspath(os.path.expanduser(options.summarize_samples[0]))
         if options.summary_label != None:
             samples_label = options.summary_label
-            print "Using summary label: %s" %(samples_label)
+            print("Using summary label: %s" %(samples_label))
         else:
             samples_label = \
                 os.path.basename(os.path.expanduser(samples_dir))
-	assert(len(samples_label) >= 1)
-	summary_output_dir = \
+        assert(len(samples_label) >= 1)
+        summary_output_dir = \
             os.path.abspath(os.path.join(os.path.expanduser(options.summarize_samples[1]),
                                          'summary'))
-	if not os.path.isdir(summary_output_dir):
+        if not os.path.isdir(summary_output_dir):
             misc_utils.make_dir(summary_output_dir)
-	    
-	summary_filename = os.path.join(summary_output_dir,
-					'%s.miso_summary' %(samples_label))
-	samples_utils.summarize_sampler_results(samples_dir,
+
+        summary_filename = os.path.join(summary_output_dir,
+                                        '%s.miso_summary' %(samples_label))
+        samples_utils.summarize_sampler_results(samples_dir,
                                             summary_filename,
                                             use_compressed=use_compressed)
 

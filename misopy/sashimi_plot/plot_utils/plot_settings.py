@@ -5,7 +5,7 @@ import sys
 import os
 import ast
 
-import ConfigParser
+import configparser
 
 import misopy
 import misopy.miso_utils as miso_utils
@@ -78,15 +78,15 @@ def parse_plot_settings(settings_filename, event=None, chrom=None,
     as the right datatype.
     """
     settings = get_default_settings()
-    
-    config = ConfigParser.ConfigParser()
 
-    print "Reading settings from: %s" %(settings_filename)
+    config = configparser.ConfigParser()
+
+    print("Reading settings from: %s" %(settings_filename))
     config.read(settings_filename)
-    
+
     for section in config.sections():
         for option in config.options(section):
-            print "Parsing %s:%s" %(section, option)
+            print("Parsing %s:%s" %(section, option))
             if option in FLOAT_PARAMS:
                 settings[option] = config.getfloat(section, option)
             elif option in INT_PARAMS:
@@ -101,13 +101,13 @@ def parse_plot_settings(settings_filename, event=None, chrom=None,
 
     # Ensure that bf_thresholds are integers
     settings["bf_thresholds"] = [int(t) for t in settings["bf_thresholds"]]
-    
+
     if "colors" in settings:
         colors = ast.literal_eval(settings["colors"])
     else:
         colors = [None for x in settings["bam_files"]]
     settings["colors"] = colors
-        
+
     if "bam_prefix" in settings:
         bam_files = [os.path.join(settings["bam_prefix"], x) \
                     for x in settings["bam_files"]]
@@ -123,9 +123,9 @@ def parse_plot_settings(settings_filename, event=None, chrom=None,
     num_bams = len(settings["bam_files"])
     num_colors = len(settings["colors"])
     if not (num_labels == num_bams == num_colors):
-        print "Error: Must provide sample label and color for each entry in bam_files!"
-        print "  - Provided %d labels, %d BAMs, %d colors" \
-            %(num_labels, num_bams, num_colors)
+        print("Error: Must provide sample label and color for each entry in bam_files!")
+        print("  - Provided %d labels, %d BAMs, %d colors" \
+            %(num_labels, num_bams, num_colors))
         sys.exit(1)
 
     if no_posteriors:
@@ -139,10 +139,10 @@ def parse_plot_settings(settings_filename, event=None, chrom=None,
     else:
         miso_files = []
     settings["miso_files"] = miso_files
-    
+
     if "coverages" in settings:
         coverages = ast.literal_eval(settings["coverages"])
-        coverages = map(float, coverages)
+        coverages = list(map(float, coverages))
         # Normalize coverages per M
         coverages = [x / 1e6  for x in coverages]
     else:
@@ -150,7 +150,7 @@ def parse_plot_settings(settings_filename, event=None, chrom=None,
     settings["coverages"] = coverages
 
     if len(settings["coverages"]) != len(settings["sample_labels"]):
-        print "Error: Must provide a coverage value for each sample or leave coverages unset."
+        print("Error: Must provide a coverage value for each sample or leave coverages unset.")
         sys.exit(1)
-    
+
     return settings

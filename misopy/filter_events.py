@@ -43,7 +43,7 @@ def get_counts(counts_str):
 
     if len(fields) == 0:
         return None
-    
+
     for field in fields:
         iso_type, count = field.split(":")
         count = int(count)
@@ -101,8 +101,8 @@ def multi_filter(filter_filename, output_dir, num_total, num_inc, num_exc,
         data, h = csv2dictlist_raw(fname)
         total_events.append(len(data))
 
-        filtered = filter_events(data, h, num_total, num_inc, num_exc, num_sum, 
-                                    delta_psi_filter, bf_filter, 
+        filtered = filter_events(data, h, num_total, num_inc, num_exc, num_sum,
+                                    delta_psi_filter, bf_filter,
                                     apply_both_samples=apply_both_samples)
         comp.append(filtered)
 
@@ -111,8 +111,8 @@ def multi_filter(filter_filename, output_dir, num_total, num_inc, num_exc,
         num_pass = len(comp[0])
         output_filename = os.path.join(output_dir,
                                        os.path.basename(fname) + ".filtered")
-        print "Filtering %s into %s" %(",".join(filter_filename),
-                                       output_filename)
+        print("Filtering %s into %s" %(",".join(filter_filename),
+                                       output_filename))
         filter_output(comp[0], output_filename, h, num_pass, total_events[0])
 
     else:
@@ -129,7 +129,7 @@ def multi_filter(filter_filename, output_dir, num_total, num_inc, num_exc,
                 rep_list[c][event['event_name']].append(event)
             c = c + 1
 
-        for event_name in event_dict.keys():
+        for event_name in list(event_dict.keys()):
             # not enough replicates of the event passed the previous filters
             if len(event_dict[event_name]) < diff_thresh:
                 del(event_dict[event_name])
@@ -146,7 +146,7 @@ def multi_filter(filter_filename, output_dir, num_total, num_inc, num_exc,
                     dp_list = dp_list + dp_pass
                     continue
 
-                # adds the result from the current event to the ones from the 
+                # adds the result from the current event to the ones from the
                 # previous events
                 bf_pass = bayes_factor_pass(event['bayes_factor'], bf_filter)
                 bf_list = [sum(x) for x in zip(bf_list, bf_pass)]
@@ -171,17 +171,17 @@ def multi_filter(filter_filename, output_dir, num_total, num_inc, num_exc,
         for events in comp:
             event_list = []
             for event in events:
-                if event_dict.has_key(event['event_name']):
+                if event['event_name'] in event_dict:
                     event_list.append(event)
             comp_new.append(event_list)
-    
+
         for i in range(0, len(comp_new)):
             num_pass = len(comp_new[i])
             fname = filter_filename[i]
             output_filename = os.path.join(output_dir,
                                            os.path.basename(fname) + ".filtered")
-            print "Filtering %s into %s" %(fname,
-                                           output_filename)
+            print("Filtering %s into %s" %(fname,
+                                           output_filename))
             filter_output(comp_new[i], output_filename, h, num_pass, total_events[i])
 
 
@@ -224,12 +224,12 @@ def delta_psi_pass(delta_psi, dp_filter):
 
 def fix_bayes_factor(bayes_factor):
     """
-    If one of the bayes factors is 'inf' we get a string instead of a 
+    If one of the bayes factors is 'inf' we get a string instead of a
     tuple back. This is hacky but fixes that.
     """
     # Maximum cut off for Bayes factor value
     max_bf = 1e12
-    
+
     if type(bayes_factor) == str:
         bayes_factor = bayes_factor.split(",")
         bayes_factor = [min(float(x), max_bf) for x in bayes_factor]
@@ -249,7 +249,7 @@ def filter_events(data, h, num_total, num_inc, num_exc, num_sum,
 
     if abs(delta_psi_filter) > 1 or \
        abs(delta_psi_filter) < 0:
-        raise Exception, "Error: delta psi value outside [0, 1]." 
+        raise Exception("Error: delta psi value outside [0, 1].")
 
     for event in data:
         # Sometimes the bayes factor is not formatted correctly, this fixes that
@@ -257,9 +257,9 @@ def filter_events(data, h, num_total, num_inc, num_exc, num_sum,
 
         num_isoforms = len(event['isoforms'])
         if num_isoforms != 2:
-            print "Error: filter_events.py is only defined for MISO output " \
+            print("Error: filter_events.py is only defined for MISO output " \
                   "on two-isoform alternative events. " \
-                  "Found a non-two isoform event: %s" %(event['event_name'])
+                  "Found a non-two isoform event: %s" %(event['event_name']))
             sys.exit(1)
 
         # Get sample 1 counts
@@ -299,9 +299,9 @@ def filter_events(data, h, num_total, num_inc, num_exc, num_sum,
             sample2_counts = get_counts(event['sample2_counts'])
 
             if sample2_counts == None:
-                raise Exception, "Incompatible samples."
-            
-            sample2_inc, sample2_exc, sample2_both = sample2_counts            
+                raise Exception("Incompatible samples.")
+
+            sample2_inc, sample2_exc, sample2_both = sample2_counts
 
             sample2_result = filter_event(sample2_inc, sample2_exc, sample2_both,
                                           num_total, num_inc, num_exc, num_sum)
@@ -333,22 +333,22 @@ def filter_output(filtered_events, output_filename, h, num_pass, total_events):
     """
     dictlist2file(filtered_events, output_filename, h)
 
-    print "%d/%d events pass the filter (%.2f percent)." \
+    print("%d/%d events pass the filter (%.2f percent)." \
           %(num_pass,
             total_events,
-            (num_pass/float(total_events)) * 100)
+            (num_pass/float(total_events)) * 100))
 
 
 def greeting():
-    print "filter_events: filtering MISO pairwise comparison output.\n"
-    print "Note: This utility is only works on MISO output for two-isoform "
-    print "event annotations.\n"
-    
-    
+    print("filter_events: filtering MISO pairwise comparison output.\n")
+    print("Note: This utility is only works on MISO output for two-isoform ")
+    print("event annotations.\n")
+
+
 def main():
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option("--filter", dest="filter_filename", default=None, 
+    parser.add_option("--filter", dest="filter_filename", default=None,
                       action="callback", callback=fname_callback,
                       help="Comparison file to filter or list of replicate files to filter.")
     parser.add_option("--control", dest="control_filename", default=[],
@@ -389,11 +389,11 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.filter_filename == None:
-        print "Need at least one filename to filter (use --filter.)"
+        print("Need at least one filename to filter (use --filter.)")
         return
     if options.output_dir == None:
-        print "Need an output directory to output filtered file to " \
-              "(use --output-dir)"
+        print("Need an output directory to output filtered file to " \
+              "(use --output-dir)")
         return
 
     filter_filename = []
@@ -412,8 +412,8 @@ def main():
     #                  apply_both_samples=options.apply_both)
 
     multi_filter(filter_filename, output_dir, options.num_total, options.num_inc,
-            options.num_exc, options.num_sum, options.delta_psi, 
-            options.bayes_factor, options.vote_thresh, 
+            options.num_exc, options.num_sum, options.delta_psi,
+            options.bayes_factor, options.vote_thresh,
             apply_both_samples=options.apply_both)
 
 if __name__ == '__main__':
